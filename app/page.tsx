@@ -1,4 +1,3 @@
-import Navbar from "@/components/navbar";
 import Reveal from "@/components/reveal";
 
 export default function Home() {
@@ -10,8 +9,6 @@ export default function Home() {
         <div className="bg-orb bg-orb-2"></div>
         <div className="bg-orb bg-orb-3"></div>
       </div>
-
-      <Navbar />
 
       <section className="hero">
         <Reveal>
@@ -35,7 +32,7 @@ export default function Home() {
         <Reveal delay={3}>
           <div className="hero-actions">
             <a href="#" className="btn btn-primary btn-lg">
-              Start Studying
+              Sign In
             </a>
           </div>
         </Reveal>
