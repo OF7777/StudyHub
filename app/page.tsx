@@ -34,7 +34,7 @@ export default function Home() {
         </Reveal>
         <Reveal delay={3}>
           <div className="hero-actions">
-            <a href="#" className="btn btn-primary btn-lg">
+            <a href="/auth" className="btn btn-primary btn-lg">
               Start Studying
             </a>
           </div>
