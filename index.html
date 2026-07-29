@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyHub</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #242836;
+    --border: #2e3345;
+    --text: #e4e6f0;
+    --text-muted: #8b8fa3;
+    --accent: #6c63ff;
+    --accent-hover: #7f78ff;
+    --accent-glow: rgba(108, 99, 255, 0.15);
+    --green: #34d399;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --radius: 12px;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(15, 17, 23, 0.85);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a { color: var(--text-muted); font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(108, 99, 255, 0.25);
+  }
+  .hero h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 .gradient {
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    max-width: 520px;
+    margin: 0 auto 2rem;
+  }
+  .hero-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+  /* STATS */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .stat { text-align: center; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  /* FEATURES */
+  .section { padding: 3rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+  }
+  .section-sub {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feature-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .feature-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+
+  /* SUBJECTS */
+  .subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  .subject-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .subject-card:hover { border-color: var(--accent); background: var(--surface-2); }
+  .subject-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .subject-card h4 { font-size: 0.9rem; font-weight: 600; }
+  .subject-card span { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* CTA */
+  .cta {
+    text-align: center;
+    padding: 4rem 2rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .cta h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .cta p { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--text-muted); margin: 0 0.75rem; }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2.2rem; }
+    .stats { gap: 1.5rem; }
+    .nav-links a:not(.btn) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">&#128218; Study<span>Hub</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#subjects">Subjects</a>
+    <a href="#" class="btn btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">Free &amp; Open Source</div>
+  <h1>Your all-in-one<br><span class="gradient">study companion</span></h1>
+  <p>Organize notes, track progress, and master any subject with smart tools built for focused learning.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn btn-primary" style="padding:0.7rem 1.6rem;font-size:0.95rem;">Start Studying</a>
+    <a href="#features" class="btn btn-outline" style="padding:0.7rem 1.6rem;font-size:0.95rem;">Learn More</a>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-value" id="stat1">0</div><div class="stat-label">Active Users</div></div>
+  <div class="stat"><div class="stat-value" id="stat2">0</div><div class="stat-label">Study Hours</div></div>
+  <div class="stat"><div class="stat-value" id="stat3">0</div><div class="stat-label">Subjects</div></div>
+</div>
+
+<section class="section" id="features">
+  <h2 class="section-title">Everything you need to study smarter</h2>
+  <p class="section-sub">Powerful tools designed to help you learn efficiently and retain more.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.12);color:var(--accent);">&#128221;</div>
+      <h3>Smart Notes</h3>
+      <p>Rich-text editor with markdown support, code blocks, and LaTeX for math notation.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(52,211,153,0.12);color:var(--green);">&#128200;</div>
+      <h3>Progress Tracking</h3>
+      <p>Visualize your study streaks, hours logged, and subject mastery over time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(251,146,60,0.12);color:var(--orange);">&#128197;</div>
+      <h3>Study Planner</h3>
+      <p>Schedule sessions, set goals, and get reminders to stay on track with exams.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(244,114,182,0.12);color:var(--pink);">&#127183;</div>
+      <h3>Flashcards</h3>
+      <p>Spaced repetition system that adapts to your memory for optimal retention.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(96,165,250,0.12);color:var(--blue);">&#9201;</div>
+      <h3>Pomodoro Timer</h3>
+      <p>Built-in focus timer with customizable work and break intervals.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.12);color:var(--accent);">&#128101;</div>
+      <h3>Study Groups</h3>
+      <p>Collaborate with classmates, share notes, and quiz each other in real time.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="subjects">
+  <h2 class="section-title">Explore subjects</h2>
+  <p class="section-sub">Pre-built templates and resources for popular subjects.</p>
+  <div class="subjects-grid">
+    <div class="subject-card"><div class="subject-icon">&#128290;</div><h4>Mathematics</h4><span>142 resources</span></div>
+    <div class="subject-card"><div class="subject-icon">&#9883;</div><h4>Physics</h4><span>98 resources</span></div>
+    <div class="subject-card"><div class="subject-icon">&#129516;</div><h4>Chemistry</h4><span>76 resources</span></div>
+    <div class="subject-card"><div class="subject-icon">&#129668;</div><h4>Biology</h4><span>110 resources</span></div>
+    <div class="subject-card"><div class="subject-icon">&#128187;</div><h4>Computer Science</h4><span>203 resources</span></div>
+    <div class="subject-card"><div class="subject-icon">&#128214;</div><h4>Literature</h4><span>87 resources</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="cta">
+    <h2>Ready to level up your studying?</h2>
+    <p>Join thousands of students already using StudyHub to ace their exams.</p>
+    <a href="#" class="btn btn-primary" style="padding:0.7rem 1.8rem;font-size:0.95rem;">Create Free Account</a>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:0.5rem;">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+    <a href="#">GitHub</a>
+  </div>
+  <p>&copy; 2026 StudyHub. All rights reserved.</p>
+</footer>
+
+<script>
+  function animateCounter(el, target, suffix) {
+    let current = 0;
+    const step = Math.ceil(target / 60);
+    const interval = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(interval); }
+      el.textContent = current.toLocaleString() + (suffix || '');
+    }, 20);
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(document.getElementById('stat1'), 12450, '+');
+        animateCounter(document.getElementById('stat2'), 89000, '+');
+        animateCounter(document.getElementById('stat3'), 45, '+');
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+  observer.observe(document.querySelector('.stats'));
+</script>
+</body>
+</html>
