@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,8 +10,24 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [noteCount, setNoteCount] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    audioRef.current = new Audio("/Music.mp3");
+    audioRef.current.addEventListener("ended", () => {
+      setIsPlaying(false);
+    });
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const getUser = async () => {
@@ -53,6 +69,18 @@ export default function DashboardPage() {
     router.push("/auth");
   };
 
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-loading">
@@ -78,6 +106,9 @@ export default function DashboardPage() {
           Study<span>Hub</span>
         </Link>
         <div className="nav-user">
+          <button onClick={toggleMusic} className="music-btn" title={isPlaying ? "Pause music" : "Play music"}>
+            {isPlaying ? "🎵" : "🔇"}
+          </button>
           <span className="user-email">{user.email}</span>
           <button onClick={handleSignOut} className="btn btn-outline">
             Sign Out
@@ -195,6 +226,26 @@ export default function DashboardPage() {
           font-size: 0.85rem;
           color: var(--text-muted);
           font-weight: 500;
+        }
+        .music-btn {
+          background: rgba(202, 138, 4, 0.1);
+          border: 1px solid rgba(202, 138, 4, 0.2);
+          border-radius: 8px;
+          padding: 0.4rem 0.6rem;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .music-btn:hover {
+          background: rgba(202, 138, 4, 0.15);
+          border-color: rgba(202, 138, 4, 0.3);
+          transform: scale(1.05);
+        }
+        .music-btn:active {
+          transform: scale(0.95);
         }
         .dashboard-container {
           max-width: 1100px;
