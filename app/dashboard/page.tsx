@@ -9,6 +9,7 @@ import Reveal from "@/components/reveal";
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [noteCount, setNoteCount] = useState(0);
   const router = useRouter();
   const supabase = createClient();
 
@@ -19,6 +20,7 @@ export default function DashboardPage() {
         router.push("/auth");
       } else {
         setUser(user);
+        fetchNoteCount(user.id);
       }
       setLoading(false);
     };
@@ -30,11 +32,21 @@ export default function DashboardPage() {
         router.push("/auth");
       } else if (session?.user) {
         setUser(session.user);
+        fetchNoteCount(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [router, supabase]);
+
+  const fetchNoteCount = async (userId: string) => {
+    const { count } = await supabase
+      .from("notes")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    
+    setNoteCount(count || 0);
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -83,14 +95,16 @@ export default function DashboardPage() {
 
         <div className="dashboard-grid">
           <Reveal delay={1}>
-            <div className="dashboard-card">
-              <div className="card-icon" style={{ background: "rgba(202,138,4,0.12)", color: "var(--accent)" }}>
-                &#128221;
+            <Link href="/notes" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(202,138,4,0.12)", color: "var(--accent)" }}>
+                  &#128221;
+                </div>
+                <h3>My Notes</h3>
+                <p>{noteCount} {noteCount === 1 ? "note" : "notes"}</p>
+                <span className="btn btn-outline">View Notes</span>
               </div>
-              <h3>My Notes</h3>
-              <p>0 notes</p>
-              <button className="btn btn-outline">Create Note</button>
-            </div>
+            </Link>
           </Reveal>
 
           <Reveal delay={2}>
@@ -141,6 +155,14 @@ export default function DashboardPage() {
               <div className="stat-value">0</div>
               <div className="stat-label">Subjects</div>
             </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={6}>
+          <div className="quick-actions">
+            <Link href="/notes/new" className="btn btn-primary">
+              + New Note
+            </Link>
           </div>
         </Reveal>
       </div>
@@ -212,6 +234,15 @@ export default function DashboardPage() {
           transform: translateY(-3px);
           box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
           border-color: var(--border-hover);
+        }
+        .dashboard-card-link {
+          text-decoration: none;
+          display: block;
+        }
+        .quick-actions {
+          margin-top: 2rem;
+          display: flex;
+          justify-content: center;
         }
         .card-icon {
           width: 48px;
