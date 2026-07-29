@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [noteCount, setNoteCount] = useState(0);
+  const [badgeCount, setBadgeCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function DashboardPage() {
       } else {
         setUser(user);
         fetchNoteCount(user.id);
+        fetchBadgeCount(user.id);
       }
       setLoading(false);
     };
@@ -49,6 +51,7 @@ export default function DashboardPage() {
       } else if (session?.user) {
         setUser(session.user);
         fetchNoteCount(session.user.id);
+        fetchBadgeCount(session.user.id);
       }
     });
 
@@ -62,6 +65,15 @@ export default function DashboardPage() {
       .eq("user_id", userId);
     
     setNoteCount(count || 0);
+  };
+
+  const fetchBadgeCount = async (userId: string) => {
+    const { count } = await supabase
+      .from("badges")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    
+    setBadgeCount(count || 0);
   };
 
   const handleSignOut = async () => {
@@ -139,6 +151,19 @@ export default function DashboardPage() {
           </Reveal>
 
           <Reveal delay={2}>
+            <Link href="/badges" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(251,191,36,0.12)", color: "#d97706" }}>
+                  🏆
+                </div>
+                <h3>Badges</h3>
+                <p>{badgeCount} {badgeCount === 1 ? "badge" : "badges"} earned</p>
+                <span className="btn btn-outline">View Badges</span>
+              </div>
+            </Link>
+          </Reveal>
+
+          <Reveal delay={3}>
             <div className="dashboard-card">
               <div className="card-icon" style={{ background: "rgba(22,163,74,0.1)", color: "var(--green)" }}>
                 &#128200;
@@ -149,7 +174,7 @@ export default function DashboardPage() {
             </div>
           </Reveal>
 
-          <Reveal delay={3}>
+          <Reveal delay={4}>
             <div className="dashboard-card">
               <div className="card-icon" style={{ background: "rgba(234,88,12,0.1)", color: "var(--orange)" }}>
                 &#127183;
@@ -160,7 +185,7 @@ export default function DashboardPage() {
             </div>
           </Reveal>
 
-          <Reveal delay={4}>
+        <Reveal delay={6}>
             <div className="dashboard-card">
               <div className="card-icon" style={{ background: "rgba(37,99,235,0.1)", color: "var(--blue)" }}>
                 &#9201;
@@ -189,7 +214,7 @@ export default function DashboardPage() {
           </div>
         </Reveal>
 
-        <Reveal delay={6}>
+        <Reveal delay={7}>
           <div className="quick-actions">
             <Link href="/notes/new" className="btn btn-primary">
               + New Note

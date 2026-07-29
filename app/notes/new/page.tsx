@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { checkAndAwardBadges } from "@/lib/badge-awards";
 
 export default function NewNotePage() {
   const [title, setTitle] = useState("");
@@ -49,6 +50,7 @@ export default function NewNotePage() {
       setError("Failed to save note");
       setSaving(false);
     } else {
+      await checkAndAwardBadges(user.id);
       router.push("/notes");
     }
   };
