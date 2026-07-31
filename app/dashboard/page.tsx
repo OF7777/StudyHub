@@ -303,6 +303,9 @@ export default function DashboardPage() {
             <Link href="/notes/new" className="btn btn-primary">
               + New Note
             </Link>
+            <Link href="/sites" className="btn btn-outline">
+              Study Sites
+            </Link>
           </div>
         </Reveal>
       </div>
