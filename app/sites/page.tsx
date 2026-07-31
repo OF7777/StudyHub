@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Reveal from "@/components/reveal";
 
 interface Site {
@@ -44,6 +45,11 @@ export default function SitesPage() {
 
   return (
     <>
+      <div style={{ padding: "1rem 2rem" }}>
+        <Link href="/dashboard" className="btn btn-outline" style={{ fontSize: "0.85rem" }}>
+          ← Back to Dashboard
+        </Link>
+      </div>
       <div className="section">
         <Reveal>
           <p className="section-label">Study Resources</p>
@@ -95,20 +101,19 @@ export default function SitesPage() {
         {sites && (
           <div className="features-grid" style={{ maxWidth: 700, margin: "0 auto" }}>
             {sites.map((site, i) => (
-              <Reveal key={i} delay={Math.min(i, 4)}>
-                <div className="feature-card">
-                  <h3>{site.name}</h3>
-                  <p style={{ marginBottom: "0.5rem" }}>{site.description}</p>
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: "0.82rem", fontWeight: 600 }}
-                  >
-                    Visit site &rarr;
-                  </a>
-                </div>
-              </Reveal>
+              <div key={i} className="feature-card">
+                <h3>{site.name}</h3>
+                <p style={{ marginBottom: "0.5rem" }}>{site.description}</p>
+                <a
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline"
+                  style={{ display: "inline-block", marginTop: "0.5rem" }}
+                >
+                  Visit site →
+                </a>
+              </div>
             ))}
           </div>
         )}

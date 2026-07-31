@@ -308,6 +308,9 @@ export default function DashboardPage() {
             <Link href="/sites" className="btn btn-outline">
               Study Sites
             </Link>
+            <Link href="/calendar" className="btn btn-outline">
+              📅 Calendar
+            </Link>
           </div>
         </Reveal>
       </div>
