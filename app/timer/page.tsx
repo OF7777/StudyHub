@@ -56,8 +56,10 @@ export default function TimerPage() {
         <div className="timer-tips">
           <h3>💡 Tips</h3>
           <ul>
-            <li>Study for at least 1 minute to save a session</li>
+            <li>Set your desired study duration before starting</li>
+            <li>Enable notifications to get alerted when time is up</li>
             <li>Add a subject to organize your study time</li>
+            <li>Sessions of 1+ minute are automatically saved</li>
             <li>Consistent daily sessions build your streak</li>
           </ul>
         </div>

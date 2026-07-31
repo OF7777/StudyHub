@@ -341,11 +341,18 @@ export default function NotesPage() {
           font-size: 0.85rem;
           font-family: inherit;
           background: rgba(255, 255, 255, 0.7);
+          transition: all 0.2s ease;
+        }
+        .search-input:hover {
+          border-color: var(--border-hover);
+          background-color: rgba(255, 255, 255, 0.9);
         }
         .search-input:focus {
           outline: none;
           border-color: var(--accent);
-          box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.1);
+          background-color: rgba(255, 255, 255, 1);
+          box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.15);
+          transform: translateY(-1px);
         }
         .filter-group {
           display: flex;
@@ -353,7 +360,7 @@ export default function NotesPage() {
           flex-wrap: wrap;
         }
         .filter-select {
-          padding: 0.6rem 1rem;
+          padding: 0.6rem 2.5rem 0.6rem 1rem;
           border: 1px solid var(--border);
           border-radius: 10px;
           font-size: 0.85rem;
@@ -361,10 +368,27 @@ export default function NotesPage() {
           background: rgba(255, 255, 255, 0.7);
           cursor: pointer;
           min-width: 140px;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6850' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 0.8rem center;
+          transition: all 0.2s ease;
+        }
+        .filter-select:hover {
+          border-color: var(--border-hover);
+          background-color: rgba(255, 255, 255, 0.9);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         .filter-select:focus {
           outline: none;
           border-color: var(--accent);
+          background-color: rgba(255, 255, 255, 1);
+          box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.15);
+          transform: translateY(-1px);
+        }
+        .filter-select:active {
+          transform: translateY(0);
         }
         .empty-state {
           text-align: center;
