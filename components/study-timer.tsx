@@ -20,8 +20,28 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
   const [inputMinutes, setInputMinutes] = useState(25);
   const [inputSeconds, setInputSeconds] = useState(0);
   const [subject, setSubject] = useState("");
+  const [notificationStatus, setNotificationStatus] = useState<NotificationPermission>("default");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    setNotificationStatus(Notification.permission);
+    const saved = localStorage.getItem("studyhub-timer-notifications");
+    if (saved !== null) {
+      setNotificationsEnabled(saved === "true");
+    }
+  }, []);
+
+  const toggleNotifications = () => {
+    const newVal = !notificationsEnabled;
+    setNotificationsEnabled(newVal);
+    localStorage.setItem("studyhub-timer-notifications", String(newVal));
+  };
+
+  useEffect(() => {
+    setNotificationStatus(Notification.permission);
+  }, []);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
@@ -106,8 +126,8 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
     // Play notification sound
     playNotificationSound();
     
-    // Show browser notification
-    if (Notification.permission === "granted") {
+    // Show browser notification only if enabled
+    if (notificationsEnabled && Notification.permission === "granted") {
       new Notification("Study Time's Up! 🎉", {
         body: `Great job studying ${timer.subject}! Time to take a break.`,
         icon: "/favicon.ico",
@@ -163,9 +183,10 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
     oscillator.stop(audioContext.currentTime + 0.5);
   };
 
-  const requestNotificationPermission = () => {
+  const requestNotificationPermission = async () => {
     if (Notification.permission === "default") {
-      Notification.requestPermission();
+      const permission = await Notification.requestPermission();
+      setNotificationStatus(permission);
     }
   };
 
@@ -218,9 +239,24 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
           <button onClick={handleAddTimer} className="btn btn-primary timer-btn">
             + Add Timer
           </button>
-          <button onClick={requestNotificationPermission} className="btn btn-outline timer-btn" style={{ fontSize: "0.85rem" }}>
-            🔔 Enable Notifications
-          </button>
+          <div className="notification-status">
+            {notificationStatus === "denied" ? (
+              <span className="notification-badge notification-denied">
+                🔕 Notifications Blocked (enable in browser settings)
+              </span>
+            ) : notificationStatus === "default" ? (
+              <button onClick={requestNotificationPermission} className="btn btn-outline timer-btn" style={{ fontSize: "0.85rem" }}>
+                🔔 Enable Notifications
+              </button>
+            ) : (
+              <button onClick={toggleNotifications} className={`notification-badge ${notificationsEnabled ? "notification-enabled" : "notification-disabled"}`}>
+                {notificationsEnabled ? "🔔 Notifications On" : "🔕 Notifications Off"}
+                <span style={{ fontSize: "0.75rem", opacity: 0.7, marginLeft: "0.5rem" }}>
+                  (click to {notificationsEnabled ? "disable" : "enable"})
+                </span>
+              </button>
+            )}
+          </div>
         </div>
 
         {timers.length > 0 && (
@@ -467,6 +503,38 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
         .flash-message {
           font-size: 1.2rem;
           opacity: 0.9;
+        }
+        .notification-status {
+          display: flex;
+          justify-content: center;
+        }
+        .notification-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+        .notification-enabled {
+          background: rgba(22, 163, 74, 0.1);
+          color: var(--green);
+          border: 1px solid rgba(22, 163, 74, 0.2);
+        }
+        .notification-denied {
+          background: rgba(234, 88, 12, 0.1);
+          color: var(--orange);
+          border: 1px solid rgba(234, 88, 12, 0.2);
+        }
+        .notification-disabled {
+          background: rgba(0, 0, 0, 0.05);
+          color: var(--text-muted);
+          border: 1px solid var(--border);
+          cursor: pointer;
+        }
+        .notification-enabled {
+          cursor: pointer;
         }
       `}</style>
     </>
