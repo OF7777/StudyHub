@@ -244,14 +244,16 @@ export default function DashboardPage() {
           </Reveal>
 
           <Reveal delay={3}>
-            <div className="dashboard-card">
-              <div className="card-icon" style={{ background: "rgba(22,163,74,0.1)", color: "var(--green)" }}>
-                &#128200;
+            <Link href="/progress" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(22,163,74,0.1)", color: "var(--green)" }}>
+                  &#128200;
+                </div>
+                <h3>Progress</h3>
+                <p>{totalHours} hours studied</p>
+                <span className="btn btn-outline">View Stats</span>
               </div>
-              <h3>Progress</h3>
-              <p>{totalHours} hours studied</p>
-              <button className="btn btn-outline">View Stats</button>
-            </div>
+            </Link>
           </Reveal>
 
           <Reveal delay={4}>
