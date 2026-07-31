@@ -281,6 +281,19 @@ export default function DashboardPage() {
               </div>
             </Link>
           </Reveal>
+
+          <Reveal delay={7}>
+            <Link href="/calendar" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(219,39,119,0.1)", color: "var(--pink)" }}>
+                  📅
+                </div>
+                <h3>Calendar</h3>
+                <p>Plan your schedule</p>
+                <button className="btn btn-outline">View Calendar</button>
+              </div>
+            </Link>
+          </Reveal>
         </div>
 
         <Reveal delay={5}>
@@ -302,14 +315,11 @@ export default function DashboardPage() {
 
         <Reveal delay={7}>
           <div className="quick-actions">
-            <Link href="/notes/new" className="btn btn-primary">
-              + New Note
-            </Link>
             <Link href="/sites" className="btn btn-outline">
               Study Sites
             </Link>
-            <Link href="/calendar" className="btn btn-outline">
-              📅 Calendar
+            <Link href="/writer" className="btn btn-outline">
+              ✍️ Writing Helper
             </Link>
           </div>
         </Reveal>
