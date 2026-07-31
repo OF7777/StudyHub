@@ -11,6 +11,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [noteCount, setNoteCount] = useState(0);
   const [badgeCount, setBadgeCount] = useState(0);
+  const [deckCount, setDeckCount] = useState(0);
+  const [totalHours, setTotalHours] = useState(0);
+  const [studyStreak, setStudyStreak] = useState(0);
+  const [subjectsCount, setSubjectsCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
@@ -39,6 +43,8 @@ export default function DashboardPage() {
         setUser(user);
         fetchNoteCount(user.id);
         fetchBadgeCount(user.id);
+        fetchDeckCount(user.id);
+        fetchStudyStats(user.id);
       }
       setLoading(false);
     };
@@ -52,6 +58,8 @@ export default function DashboardPage() {
         setUser(session.user);
         fetchNoteCount(session.user.id);
         fetchBadgeCount(session.user.id);
+        fetchDeckCount(session.user.id);
+        fetchStudyStats(session.user.id);
       }
     });
 
@@ -74,6 +82,78 @@ export default function DashboardPage() {
       .eq("user_id", userId);
     
     setBadgeCount(count || 0);
+  };
+
+  const fetchDeckCount = async (userId: string) => {
+    const { count } = await supabase
+      .from("flashcard_decks")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    
+    setDeckCount(count || 0);
+  };
+
+  const fetchStudyStats = async (userId: string) => {
+    // Fetch study sessions
+    const { data: sessions } = await supabase
+      .from("study_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("started_at", { ascending: false });
+
+    // Calculate total hours
+    if (sessions && sessions.length > 0) {
+      const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
+      setTotalHours(Math.round((totalMinutes / 60) * 10) / 10);
+    } else {
+      setTotalHours(0);
+    }
+
+    // Calculate study streak
+    if (sessions && sessions.length > 0) {
+      const uniqueDays = new Set<string>();
+      sessions.forEach(s => {
+        const date = new Date(s.started_at).toDateString();
+        uniqueDays.add(date);
+      });
+
+      const sortedDays = Array.from(uniqueDays).sort((a, b) => 
+        new Date(b).getTime() - new Date(a).getTime()
+      );
+
+      let streak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < sortedDays.length; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(checkDate.getDate() - i);
+        
+        if (sortedDays.includes(checkDate.toDateString())) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      setStudyStreak(streak);
+    } else {
+      setStudyStreak(0);
+    }
+
+    // Count subjects from notes
+    const { data: notes } = await supabase
+      .from("notes")
+      .select("subject")
+      .eq("user_id", userId)
+      .not("subject", "is", null);
+
+    if (notes && notes.length > 0) {
+      const uniqueSubjects = new Set(notes.map(n => n.subject).filter(Boolean));
+      setSubjectsCount(uniqueSubjects.size);
+    } else {
+      setSubjectsCount(0);
+    }
   };
 
   const handleSignOut = async () => {
@@ -169,46 +249,50 @@ export default function DashboardPage() {
                 &#128200;
               </div>
               <h3>Progress</h3>
-              <p>0 hours studied</p>
+              <p>{totalHours} hours studied</p>
               <button className="btn btn-outline">View Stats</button>
             </div>
           </Reveal>
 
           <Reveal delay={4}>
-            <div className="dashboard-card">
-              <div className="card-icon" style={{ background: "rgba(234,88,12,0.1)", color: "var(--orange)" }}>
-                &#127183;
+            <Link href="/flashcards" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(234,88,12,0.1)", color: "var(--orange)" }}>
+                  &#127183;
+                </div>
+                <h3>Flashcards</h3>
+                <p>{deckCount} {deckCount === 1 ? "deck" : "decks"}</p>
+                <span className="btn btn-outline">View Decks</span>
               </div>
-              <h3>Flashcards</h3>
-              <p>0 decks</p>
-              <button className="btn btn-outline">Create Deck</button>
-            </div>
+            </Link>
           </Reveal>
 
         <Reveal delay={6}>
-            <div className="dashboard-card">
-              <div className="card-icon" style={{ background: "rgba(37,99,235,0.1)", color: "var(--blue)" }}>
-                &#9201;
+            <Link href="/timer" className="dashboard-card-link">
+              <div className="dashboard-card">
+                <div className="card-icon" style={{ background: "rgba(37,99,235,0.1)", color: "var(--blue)" }}>
+                  &#9201;
+                </div>
+                <h3>Timer</h3>
+                <p>Start a session</p>
+                <button className="btn btn-outline">Start Timer</button>
               </div>
-              <h3>Timer</h3>
-              <p>Start a session</p>
-              <button className="btn btn-outline">Start Timer</button>
-            </div>
+            </Link>
           </Reveal>
         </div>
 
         <Reveal delay={5}>
           <div className="dashboard-stats">
             <div className="stat-box">
-              <div className="stat-value">0</div>
+              <div className="stat-value">{studyStreak}</div>
               <div className="stat-label">Study Streak</div>
             </div>
             <div className="stat-box">
-              <div className="stat-value">0</div>
+              <div className="stat-value">{totalHours}</div>
               <div className="stat-label">Total Hours</div>
             </div>
             <div className="stat-box">
-              <div className="stat-value">0</div>
+              <div className="stat-value">{subjectsCount}</div>
               <div className="stat-label">Subjects</div>
             </div>
           </div>

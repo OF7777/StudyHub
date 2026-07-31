@@ -9,6 +9,7 @@ import { checkAndAwardBadges } from "@/lib/badge-awards";
 export default function NewNotePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [subject, setSubject] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function NewNotePage() {
       user_id: user.id,
       title: title.trim(),
       content: content.trim(),
+      subject: subject.trim() || null,
     });
 
     if (error) {
@@ -86,6 +88,14 @@ export default function NewNotePage() {
       <div className="editor-container">
         <div className="editor-card">
           {error && <div className="error-message">{error}</div>}
+
+          <input
+            type="text"
+            placeholder="Subject (optional)"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="subject-input"
+          />
 
           <input
             type="text"
@@ -135,6 +145,20 @@ export default function NewNotePage() {
           font-size: 0.85rem;
           text-align: center;
           margin-bottom: 1.5rem;
+        }
+        .subject-input {
+          width: 100%;
+          border: none;
+          outline: none;
+          font-size: 0.9rem;
+          font-weight: 500;
+          font-family: inherit;
+          background: transparent;
+          margin-bottom: 0.75rem;
+          color: var(--accent);
+        }
+        .subject-input::placeholder {
+          color: var(--text-dim);
         }
         .title-input {
           width: 100%;
