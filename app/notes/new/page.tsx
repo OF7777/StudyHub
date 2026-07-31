@@ -6,10 +6,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { checkAndAwardBadges } from "@/lib/badge-awards";
 
+type Folder = {
+  id: string;
+  name: string;
+  color: string;
+};
+
 export default function NewNotePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
+  const [folderId, setFolderId] = useState<string>("");
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -20,10 +28,25 @@ export default function NewNotePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push("/auth");
+        return;
       }
+      fetchFolders();
     };
     checkAuth();
   }, [router, supabase]);
+
+  const fetchFolders = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("folders")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("name");
+
+    if (data) setFolders(data);
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -46,6 +69,7 @@ export default function NewNotePage() {
       title: title.trim(),
       content: content.trim(),
       subject: subject.trim() || null,
+      folder_id: folderId || null,
     });
 
     if (error) {
@@ -89,13 +113,30 @@ export default function NewNotePage() {
         <div className="editor-card">
           {error && <div className="error-message">{error}</div>}
 
-          <input
-            type="text"
-            placeholder="Subject (optional)"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="subject-input"
-          />
+          <div className="meta-row">
+            <input
+              type="text"
+              placeholder="Subject (optional)"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="subject-input"
+            />
+
+            {folders.length > 0 && (
+              <select
+                value={folderId}
+                onChange={(e) => setFolderId(e.target.value)}
+                className="folder-select"
+              >
+                <option value="">No Folder</option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
 
           <input
             type="text"
@@ -146,19 +187,39 @@ export default function NewNotePage() {
           text-align: center;
           margin-bottom: 1.5rem;
         }
+        .meta-row {
+          display: flex;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+          flex-wrap: wrap;
+        }
         .subject-input {
-          width: 100%;
+          flex: 1;
+          min-width: 150px;
           border: none;
           outline: none;
           font-size: 0.9rem;
           font-weight: 500;
           font-family: inherit;
           background: transparent;
-          margin-bottom: 0.75rem;
           color: var(--accent);
         }
         .subject-input::placeholder {
           color: var(--text-dim);
+        }
+        .folder-select {
+          padding: 0.4rem 0.8rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          font-size: 0.85rem;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          min-width: 140px;
+        }
+        .folder-select:focus {
+          outline: none;
+          border-color: var(--accent);
         }
         .title-input {
           width: 100%;

@@ -10,14 +10,31 @@ type Note = {
   id: string;
   title: string;
   content: string;
+  subject: string | null;
+  folder_id: string | null;
   created_at: string;
   updated_at: string;
+  folders?: {
+    name: string;
+    color: string;
+  } | null;
+};
+
+type Folder = {
+  id: string;
+  name: string;
+  color: string;
 };
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState<string>("all");
+  const [selectedSubject, setSelectedSubject] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("updated");
   const router = useRouter();
   const supabase = createClient();
 
@@ -28,7 +45,8 @@ export default function NotesPage() {
         router.push("/auth");
         return;
       }
-      fetchNotes();
+      await fetchNotes();
+      await fetchFolders();
     };
 
     checkAuth();
@@ -40,7 +58,7 @@ export default function NotesPage() {
 
     const { data, error } = await supabase
       .from("notes")
-      .select("*")
+      .select("*, folders(name, color)")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -48,6 +66,19 @@ export default function NotesPage() {
       setNotes(data);
     }
     setLoading(false);
+  };
+
+  const fetchFolders = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("folders")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("name");
+
+    if (data) setFolders(data);
   };
 
   const handleDelete = async (id: string) => {
@@ -61,6 +92,35 @@ export default function NotesPage() {
     }
     setDeletingId(null);
   };
+
+  // Filter and sort notes
+  const filteredNotes = notes
+    .filter((note) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFolder =
+        selectedFolder === "all" || note.folder_id === selectedFolder;
+      const matchesSubject =
+        selectedSubject === "all" || note.subject === selectedSubject;
+      return matchesSearch && matchesFolder && matchesSubject;
+    })
+    .sort((a, b) => {
+      if (sortBy === "updated") {
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      } else if (sortBy === "created") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else if (sortBy === "title") {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+
+  // Get unique subjects
+  const uniqueSubjects = Array.from(
+    new Set(notes.map((n) => n.subject).filter((s): s is string => s !== null))
+  ).sort();
 
   if (loading) {
     return (
@@ -85,8 +145,8 @@ export default function NotesPage() {
           Study<span>Hub</span>
         </Link>
         <div className="nav-actions">
-          <Link href="/dashboard" className="btn btn-ghost">
-            Back to Dashboard
+          <Link href="/folders" className="btn btn-ghost">
+            Manage Folders
           </Link>
           <Link href="/notes/new" className="btn btn-primary">
             + New Note
@@ -97,24 +157,97 @@ export default function NotesPage() {
       <div className="notes-container">
         <div className="notes-header">
           <h1>My Notes</h1>
-          <p>{notes.length} {notes.length === 1 ? "note" : "notes"}</p>
+          <p>{filteredNotes.length} of {notes.length} {notes.length === 1 ? "note" : "notes"}</p>
         </div>
 
-        {notes.length === 0 ? (
+        <div className="filters-bar">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          <div className="filter-group">
+            <select
+              value={selectedFolder}
+              onChange={(e) => setSelectedFolder(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Folders</option>
+              {folders.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Subjects</option>
+              {uniqueSubjects.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="filter-select"
+            >
+              <option value="updated">Recently Updated</option>
+              <option value="created">Recently Created</option>
+              <option value="title">Title A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        {filteredNotes.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">&#128221;</div>
-            <h3>No notes yet</h3>
-            <p>Create your first note to get started</p>
-            <Link href="/notes/new" className="btn btn-primary">
-              Create Note
-            </Link>
+            {notes.length === 0 ? (
+              <>
+                <div className="empty-icon">&#128221;</div>
+                <h3>No notes yet</h3>
+                <p>Create your first note to get started</p>
+                <Link href="/notes/new" className="btn btn-primary">
+                  Create Note
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="empty-icon">&#128269;</div>
+                <h3>No notes found</h3>
+                <p>Try adjusting your filters or search query</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="notes-grid">
-            {notes.map((note, index) => (
+            {filteredNotes.map((note, index) => (
               <Reveal key={note.id} delay={index % 5}>
                 <div className="note-card">
                   <Link href={`/notes/${note.id}`} className="note-link">
+                    <div className="note-meta-row">
+                      {note.folders && (
+                        <span
+                          className="folder-badge"
+                          style={{ background: `${note.folders.color}20`, color: note.folders.color, borderColor: `${note.folders.color}40` }}
+                        >
+                          {note.folders.name}
+                        </span>
+                      )}
+                      {note.subject && (
+                        <span className="subject-badge">{note.subject}</span>
+                      )}
+                    </div>
                     <h3>{note.title}</h3>
                     <p>{note.content.slice(0, 120) || "No content"}</p>
                     <span className="note-date">
@@ -178,7 +311,7 @@ export default function NotesPage() {
           z-index: 1;
         }
         .notes-header {
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
         }
         .notes-header h1 {
           font-size: 2rem;
@@ -189,6 +322,49 @@ export default function NotesPage() {
         .notes-header p {
           color: var(--text-muted);
           font-size: 0.9rem;
+        }
+        .filters-bar {
+          display: flex;
+          gap: 0.75rem;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+        }
+        .search-box {
+          flex: 1;
+          min-width: 200px;
+        }
+        .search-input {
+          width: 100%;
+          padding: 0.6rem 1rem;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          font-size: 0.85rem;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.7);
+        }
+        .search-input:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.1);
+        }
+        .filter-group {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+        .filter-select {
+          padding: 0.6rem 1rem;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          font-size: 0.85rem;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          min-width: 140px;
+        }
+        .filter-select:focus {
+          outline: none;
+          border-color: var(--accent);
         }
         .empty-state {
           text-align: center;
@@ -236,6 +412,28 @@ export default function NotesPage() {
           display: block;
           margin-bottom: 1rem;
         }
+        .note-meta-row {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .folder-badge {
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 0.2rem 0.6rem;
+          border-radius: 6px;
+          border: 1px solid;
+        }
+        .subject-badge {
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 0.2rem 0.6rem;
+          border-radius: 6px;
+          background: rgba(202, 138, 4, 0.1);
+          color: var(--accent);
+          border: 1px solid rgba(202, 138, 4, 0.2);
+        }
         .note-link h3 {
           font-size: 1rem;
           font-weight: 700;
@@ -282,6 +480,15 @@ export default function NotesPage() {
             flex-direction: column;
             align-items: flex-end;
             gap: 0.3rem;
+          }
+          .filters-bar {
+            flex-direction: column;
+          }
+          .filter-group {
+            width: 100%;
+          }
+          .filter-select {
+            flex: 1;
           }
         }
       `}</style>
