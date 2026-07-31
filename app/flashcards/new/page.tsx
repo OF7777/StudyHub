@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { checkAndAwardBadges } from "@/lib/badge-awards";
 
 type Card = {
   front: string;
@@ -96,6 +97,7 @@ export default function NewDeckPage() {
       setError("Failed to save cards");
       setSaving(false);
     } else {
+      await checkAndAwardBadges(user.id);
       router.push("/flashcards");
     }
   };

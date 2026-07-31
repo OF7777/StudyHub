@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase";
+import { checkAndAwardBadges } from "@/lib/badge-awards";
 
 export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: () => void }) {
   const [isRunning, setIsRunning] = useState(false);
@@ -58,6 +59,8 @@ export default function StudyTimer({ onSessionComplete }: { onSessionComplete?: 
           started_at: new Date(Date.now() - seconds * 1000).toISOString(),
           ended_at: new Date().toISOString(),
         });
+        
+        await checkAndAwardBadges(user.id);
         
         if (onSessionComplete) {
           onSessionComplete();
